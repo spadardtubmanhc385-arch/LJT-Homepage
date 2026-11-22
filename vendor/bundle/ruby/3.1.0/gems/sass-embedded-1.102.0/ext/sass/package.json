@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "sass": "file:sass-1.102.0.tgz"
+  }
+}
