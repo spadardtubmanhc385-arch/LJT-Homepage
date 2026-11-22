@@ -8,6 +8,13 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
       - name: Clean temporary and irrelevant files
         run: |
           git config user.name "github-actions[bot]"
@@ -24,7 +31,7 @@ jobs:
           git push origin HEAD:master
       - name: Build site
         run: |
-          sudo npm install -g uglify-js
+          npm install -g uglify-js
           uglifyjs assets/js/plugins/jquery.greedy-navigation.js assets/js/_main.js assets/js/theme.js -c -m -o assets/js/main.min.js
           bundle exec jekyll build --baseurl "/LJT-Homepage"
           cp -r _site /tmp/built-site
