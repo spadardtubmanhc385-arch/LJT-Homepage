@@ -2,17 +2,27 @@ name: Temporary enable Pages
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
 jobs:
   enable:
     runs-on: ubuntu-latest
     steps:
-      - name: Enable GitHub Pages
+      - uses: actions/checkout@v4
+      - name: Probe Pages API
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -x
-          gh api "repos/${GITHUB_REPOSITORY}/pages" || true
-          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages" -f 'build_type=workflow'
-          gh api "repos/${GITHUB_REPOSITORY}/pages"
+          {
+            echo "=== GET pages ==="
+            gh api "repos/${GITHUB_REPOSITORY}/pages"
+            echo "=== POST workflow build type ==="
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/pages" -f 'build_type=workflow'
+            echo "=== GET pages after ==="
+            gh api "repos/${GITHUB_REPOSITORY}/pages"
+          } > pages-diagnosis.txt 2>&1 || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pages-diagnosis.txt
+          git commit -m "Record Pages enablement diagnostics"
+          git push origin HEAD:master
